@@ -60,20 +60,33 @@ module.exports = (
     },
 
     async user(email, username) {
+
+      const { user: userService } = strapi.query('plugin::users-permissions.user')
+      
+      if(email || username) {
+        
+        const user = await userService.findOne({
+          where: email ? { email } : { username }
+        });
+
+        if (user) {
+          return user;
+        }
+
+        // CHECK THAT THE CALL TO userService did succeed, and did not find a user BEFORE
+        // creating a new user
+      }
+
       const settings = await this.settings();
-      const {user: userService} = strapi.plugins['users-permissions'].services;
-      const user = email ? await userService.fetch({email}) : null;
-      if (user) {
-        return user;
-      }
-      const userByUsername = username ? await userService.fetch({username}) : null;
-      if (userByUsername) {
-        return userByUsername
-      }
+
+      console.log({email, username, settings})
+
       if (email && settings.createUserIfNotExists) {
         return this.createUser({email, username})
       }
+
       return false;
+      
     },
 
     async sendLoginLink(token) {
