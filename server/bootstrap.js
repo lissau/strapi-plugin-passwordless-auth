@@ -47,7 +47,6 @@ module.exports = async (
       enabled: true,
       createUserIfNotExists: true,
       expire_period: 3600,
-      confirmationUrl: getAbsoluteServerUrl(strapi.config),
       from_name: 'Administration Panel',
       from_email: 'no-reply@strapi.io',
       response_email: '',

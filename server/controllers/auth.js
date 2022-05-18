@@ -13,7 +13,7 @@ const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"
 
 module.exports = {
   async login(ctx) {
-    const {loginToken} = ctx.query;
+    const {token: receivedToken, callbackUrl} = ctx.query;
     const {passwordless} = strapi.plugins['passwordless'].services;
     const {user: userService, jwt: jwtService} = strapi.plugins['users-permissions'].services;
     const isEnabled = await passwordless.isEnabled();
@@ -22,13 +22,25 @@ module.exports = {
       return ctx.badRequest('plugin.disabled');
     }
 
-    if (_.isEmpty(loginToken)) {
+    if (_.isEmpty(receivedToken)) {
       return ctx.badRequest('token.invalid');
     }
-    const token = await passwordless.fetchToken(loginToken);
+    const token = await passwordless.fetchToken(receivedToken);
 
     if (!token || !token.is_active) {
       return ctx.badRequest('token.invalid');
+    }
+
+    const settings = await passwordless.settings()
+
+    const allowedCallbackUrls = settings.allowedCallbackUrls ? settings.allowedCallbackUrls.split(",") : []
+
+    if(allowedCallbackUrls.length < 0) {
+      return ctx.badRequest("No allowed callback urls specified in settings")
+    }
+    
+    if(!allowedCallbackUrls.includes(callbackUrl)) {
+      return ctx.badRequest("Invalid callback url")
     }
 
     const isValid = await passwordless.isTokenValid(token);
@@ -53,7 +65,7 @@ module.exports = {
     }
 
     if (!user.confirmed) {
-      await userService.edit(user.id, {confirmed: true});
+      await userService.edit(user.id, { confirmed: true });
     }
     const userSchema = strapi.getModel('plugin::users-permissions.user');
     // Sanitize the template's user information
@@ -65,6 +77,8 @@ module.exports = {
     } catch (e) {
       context = {}
     }
+
+    ctx.redirect(callbackUrl)
     ctx.send({
       jwt: jwtService.issue({id: user.id}),
       user: sanitizedUserInfo,
@@ -88,6 +102,22 @@ module.exports = {
     const username = params.username || null;
 
     const isEmail = emailRegExp.test(email);
+
+    if(!params.callbackUrl) {
+      return ctx.badRequest("Missing callbackUrl parameter")
+    }
+
+    const settings = await passwordless.settings()
+
+    const allowedCallbackUrls = settings.allowedCallbackUrls ? settings.allowedCallbackUrls.split(",") : []
+
+    if(allowedCallbackUrls.length < 0) {
+      return ctx.badRequest("No allowed callback urls specified in settings")
+    }
+    
+    if(!allowedCallbackUrls.includes(params.callbackUrl)) {
+      return ctx.badRequest("Invalid callback url")
+    }
 
     if (email && !isEmail) {
       return ctx.badRequest('wrong.email');
@@ -114,7 +144,7 @@ module.exports = {
 
     try {
       const token = await passwordless.createToken(user.email, context);
-      await passwordless.sendLoginLink(token);
+      await passwordless.sendLoginLink(token, params.callbackUrl);
       ctx.send({
         email,
         username,

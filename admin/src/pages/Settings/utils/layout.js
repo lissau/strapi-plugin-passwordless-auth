@@ -53,14 +53,14 @@ const layout = [
   },
   {
     intlLabel: {
-      id: getTrad('Settings.confirmationUrl.label'),
-      defaultMessage: 'Settings.confirmationUrl.label',
+      id: getTrad('Settings.allowedCallbackUrls.label'),
+      defaultMessage: 'Settings.allowedCallbackUrls.label',
     },
     description: {
-      id: getTrad('Settings.confirmationUrl.description'),
-      defaultMessage: "Settings.confirmationUrl.description",
+      id: getTrad('Settings.allowedCallbackUrls.description'),
+      defaultMessage: "Settings.allowedCallbackUrls.description",
     },
-    name: 'confirmationUrl',
+    name: 'allowedCallbackUrls',
     type: 'text',
     size: {
       col: 12,

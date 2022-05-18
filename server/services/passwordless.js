@@ -61,11 +61,11 @@ module.exports = (
 
     async user(email, username) {
 
-      const { user: userService } = strapi.query('plugin::users-permissions.user')
+      const service = strapi.query('plugin::users-permissions.user')
       
       if(email || username) {
         
-        const user = await userService.findOne({
+        const user = await service.findOne({
           where: email ? { email } : { username }
         });
 
@@ -89,7 +89,7 @@ module.exports = (
       
     },
 
-    async sendLoginLink(token) {
+    async sendLoginLink(token, callbackUrl) {
       const settings = await this.settings();
       const user = await strapi.query('plugin::users-permissions.user').findOne({
         where: {email: token.email}
@@ -99,19 +99,19 @@ module.exports = (
       const sanitizedUserInfo = await sanitize.sanitizers.defaultSanitizeOutput(userSchema, user);
 
       const text = await this.template(settings.message_text, {
-        URL: settings.confirmationUrl,
+        URL: callbackUrl,
         CODE: token.body,
         USER: sanitizedUserInfo
       });
 
       const html = await this.template(settings.message_html, {
-        URL: settings.confirmationUrl,
+        URL: callbackUrl,
         CODE: token.body,
         USER: sanitizedUserInfo
       });
 
       const subject = await this.template(settings.object, {
-        URL: settings.confirmationUrl,
+        URL: callbackUrl,
         CODE: token.body,
         USER: sanitizedUserInfo
       });

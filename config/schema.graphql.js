@@ -47,7 +47,7 @@ module.exports = {
   `,
   query: ``,
   mutation: `
-    sendLoginLink(email: String): PasswordlessSendLinkPayload!
+    sendLoginLink(email: String, callbackUrl: String): PasswordlessSendLinkPayload!
     loginPasswordless(loginToken: String): PasswordlessLoginPayload!
   `,
   resolver: {
