@@ -19,16 +19,16 @@ module.exports = {
     const isEnabled = await passwordless.isEnabled();
 
     if (!isEnabled) {
-      return ctx.badRequest('plugin.disabled');
+      return ctx.badRequest('Plugin disabled');
     }
 
     if (_.isEmpty(receivedToken)) {
-      return ctx.badRequest('token.invalid');
+      return ctx.badRequest('Invalid token');
     }
     const token = await passwordless.fetchToken(receivedToken);
 
     if (!token || !token.is_active) {
-      return ctx.badRequest('token.invalid');
+      return ctx.badRequest('Invalid token');
     }
 
     const settings = await passwordless.settings()
@@ -87,7 +87,7 @@ module.exports = {
   },
 
   async sendLink(ctx) {
-    const {passwordless} = strapi.plugins['passwordless'].services;
+    const { passwordless } = strapi.plugins['passwordless'].services;
 
     const isEnabled = await passwordless.isEnabled();
 
@@ -96,12 +96,19 @@ module.exports = {
     }
 
     const params = _.assign(ctx.request.body);
-
-    const email = params.email ? params.email.trim().toLowerCase() : null;
     const context = params.context || {};
     const username = params.username || null;
 
+    const email = params.email ? params.email.trim().toLowerCase() : null;
     const isEmail = emailRegExp.test(email);
+    if (email && !isEmail) {
+      return ctx.badRequest('wrong.email');
+    }
+    
+    // Test if an email was already sent with a valid token
+    if(passwordless.hasRecentToken(email)) {
+      return ctx.badRequest("Token already sent")
+    }
 
     if(!params.callbackUrl) {
       return ctx.badRequest("Missing callbackUrl parameter")
@@ -117,10 +124,6 @@ module.exports = {
     
     if(!allowedCallbackUrls.includes(params.callbackUrl)) {
       return ctx.badRequest("Invalid callback url")
-    }
-
-    if (email && !isEmail) {
-      return ctx.badRequest('wrong.email');
     }
 
     let user;

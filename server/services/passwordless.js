@@ -136,14 +136,18 @@ module.exports = (
 
     async createToken(email, context) {
       const tokensService = strapi.query('plugin::passwordless.token');
-      tokensService.update({where: {email}, data: {is_active: false}});
       const body = crypto.randomBytes(20).toString('hex');
       const tokenInfo = {
         email,
         body,
         context: JSON.stringify(context)
       };
-      return tokensService.create({data: tokenInfo});
+      // Ensure only 1 active signin request
+      try {
+        return tokensService.update({where: { email }, data: tokenInfo});
+      } catch {
+        return tokensService.create({ data: tokenInfo });
+      }
     },
 
     updateTokenOnLogin(token) {
@@ -168,6 +172,19 @@ module.exports = (
     fetchToken(body) {
       const tokensService = strapi.query('plugin::passwordless.token');
       return tokensService.findOne({where: {body}});
+    },
+
+    hasRecentToken(email) {
+      const tokensService = strapi.query('plugin::passwordless.token');
+
+      const token = tokensService.findOne({where: { email }});
+
+      if(token) {
+        return this.isTokenValid(token)
+      } else {
+        return false
+      }
+      
     },
 
     template(layout, data) {
