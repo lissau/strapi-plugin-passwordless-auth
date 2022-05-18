@@ -104,9 +104,10 @@ module.exports = {
     if (email && !isEmail) {
       return ctx.badRequest('wrong.email');
     }
-    
+
     // Test if an email was already sent with a valid token
-    if(passwordless.hasRecentToken(email)) {
+    const hasRecentToken = await passwordless.hasRecentToken(email)
+    if(hasRecentToken) {
       return ctx.badRequest("Token already sent")
     }
 

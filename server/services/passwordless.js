@@ -174,10 +174,10 @@ module.exports = (
       return tokensService.findOne({where: {body}});
     },
 
-    hasRecentToken(email) {
+    async hasRecentToken(email) {
       const tokensService = strapi.query('plugin::passwordless.token');
 
-      const token = tokensService.findOne({where: { email }});
+      const token = await tokensService.findOne({where: { email }});
 
       if(token) {
         return this.isTokenValid(token)
