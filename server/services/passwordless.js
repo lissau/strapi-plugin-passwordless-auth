@@ -142,12 +142,16 @@ module.exports = (
         body,
         context: JSON.stringify(context)
       };
+      
       // Ensure only 1 active signin request
-      try {
-        return tokensService.update({where: { email }, data: tokenInfo});
-      } catch {
-        return tokensService.create({ data: tokenInfo });
+      const updatedToken = await tokensService.update({where: { email }, data: tokenInfo});
+      if(updatedToken) {
+        return updatedToken
       }
+
+      const newToken = await tokensService.create({ data: tokenInfo });
+
+      return newToken
     },
 
     updateTokenOnLogin(token) {

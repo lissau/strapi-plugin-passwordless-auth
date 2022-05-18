@@ -96,7 +96,10 @@ module.exports = {
     }
 
     const params = _.assign(ctx.request.body);
-    const context = params.context || {};
+    if(!params.callbackUrl) {
+      return ctx.badRequest("Missing callbackUrl parameter")
+    }
+
     const username = params.username || null;
 
     const email = params.email ? params.email.trim().toLowerCase() : null;
@@ -108,11 +111,7 @@ module.exports = {
     // Test if an email was already sent with a valid token
     const hasRecentToken = await passwordless.hasRecentToken(email)
     if(hasRecentToken) {
-      return ctx.badRequest("Token already sent")
-    }
-
-    if(!params.callbackUrl) {
-      return ctx.badRequest("Missing callbackUrl parameter")
+      return ctx.tooManyRequests("Token already sent")
     }
 
     const settings = await passwordless.settings()
@@ -147,6 +146,7 @@ module.exports = {
     }
 
     try {
+      const context = params.context || {};
       const token = await passwordless.createToken(user.email, context);
       await passwordless.sendLoginLink(token, params.callbackUrl);
       ctx.send({
