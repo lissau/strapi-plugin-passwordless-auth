@@ -79,29 +79,13 @@ module.exports = {
     }
 
     ctx.redirect(callbackUrl)
-    const jwt = jwtService.issue({id: user.id})
-    ctx.cookies.set("token", jwt, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production" ? true : false,
-      maxAge: 1000 * 60 * 60 * 24 * 30, // 30 Day Age
-      domain: process.env.NODE_ENV === "development" ? "localhost" : process.env.PRODUCTION_URL,
-    });
-    
     ctx.send({
-      status: "Authenticated",
+      jwt: jwtService.issue({id: user.id}),
       user: sanitizedUserInfo,
       context
     });
   },
-  async logout(ctx) {
 
-    ctx.cookies.set("token", null);
-    ctx.send({
-      authorized: true,
-      message: "Successfully destroyed session",
-    });
-
-  },
   async sendLink(ctx) {
     const { passwordless } = strapi.plugins['passwordless'].services;
 
