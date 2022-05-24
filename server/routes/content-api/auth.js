@@ -8,6 +8,14 @@ module.exports = [
     }
   },
   {
+    method: 'GET',
+    path: '/logout',
+    handler: 'auth.logout',
+    config: {
+      auth: false
+    }
+  },
+  {
     method: 'POST',
     path: '/send-link',
     handler: 'auth.sendLink',
