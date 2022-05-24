@@ -140,7 +140,8 @@ module.exports = (
       const tokenInfo = {
         email,
         body,
-        context: JSON.stringify(context)
+        context: JSON.stringify(context),
+        is_active: true
       };
       
       // Ensure only 1 active signin request
