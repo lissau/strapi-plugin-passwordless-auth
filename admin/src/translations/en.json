@@ -9,6 +9,8 @@
   "Settings.enabled.label": "Enable Passwordless plugin",
   "Settings.expire_period.label": "Link validity period (seconds)",
   "Settings.allowedCallbackUrls.label": "Allowed callback URLs",
+  "Settings.verificationUrl.label": "Verification URL",
+  "Settings.verificationUrl.description": "Url that handles the login token",
   "Email.options.from.email.label": "Shipper email",
   "Email.options.from.email.placeholder": "kai@doe.com",
   "Email.options.from.name.label": "Shipper name",

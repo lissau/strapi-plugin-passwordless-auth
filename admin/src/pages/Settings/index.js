@@ -120,7 +120,6 @@ const SettingsPage = () => {
       </Main>
     );
   }
-  console.log(data)
   return (
     <Main aria-busy={isSubmittingForm}>
       <SettingsPageTitle

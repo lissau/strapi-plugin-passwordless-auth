@@ -98,20 +98,20 @@ module.exports = (
       // Sanitize the template's user information
       const sanitizedUserInfo = await sanitize.sanitizers.defaultSanitizeOutput(userSchema, user);
 
-      const text = await this.template(settings.message_text, {
-        URL: callbackUrl,
+      const text = this.template(settings.message_text, {
+        URL: settings.verificationUrl + "?token=" + token.body + "&callbackUrl=" + callbackUrl,
         CODE: token.body,
         USER: sanitizedUserInfo
       });
 
-      const html = await this.template(settings.message_html, {
-        URL: callbackUrl,
+      const html = this.template(settings.message_html, {
+        URL: settings.verificationUrl + "?token=" + token.body + "&callbackUrl=" + callbackUrl,
         CODE: token.body,
         USER: sanitizedUserInfo
       });
 
-      const subject = await this.template(settings.object, {
-        URL: callbackUrl,
+      const subject = this.template(settings.object, {
+        URL: settings.verificationUrl + "?token=" + token.body + "&callbackUrl=" + callbackUrl,
         CODE: token.body,
         USER: sanitizedUserInfo
       });
@@ -184,7 +184,7 @@ module.exports = (
 
       const token = await tokensService.findOne({where: { email }});
 
-      if(token) {
+      if(token && token.is_active !== false) {
         return this.isTokenValid(token)
       } else {
         return false

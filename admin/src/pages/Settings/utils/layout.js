@@ -53,6 +53,22 @@ const layout = [
   },
   {
     intlLabel: {
+      id: getTrad('Settings.verificationUrl.label'),
+      defaultMessage: 'Settings.verificationUrl.label',
+    },
+    description: {
+      id: getTrad('Settings.verificationUrl.description'),
+      defaultMessage: "Settings.verificationUrl.description",
+    },
+    name: 'verificationUrl',
+    type: 'text',
+    size: {
+      col: 12,
+      xs: 12,
+    },
+  },
+  {
+    intlLabel: {
       id: getTrad('Settings.allowedCallbackUrls.label'),
       defaultMessage: 'Settings.allowedCallbackUrls.label',
     },
