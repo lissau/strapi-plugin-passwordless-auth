@@ -39,7 +39,7 @@ module.exports = {
       return ctx.badRequest("No allowed callback urls specified in settings")
     }
     
-    if(!allowedCallbackUrls.includes(callbackUrl)) {
+    if(!allowedCallbackUrls.includes(encodeURI(callbackUrl))) {
       return ctx.badRequest("Invalid callback url")
     }
 
