@@ -160,7 +160,7 @@ module.exports = (
       return tokensService.update({where: {id: token.id}, data: {is_active: false, login_date: new Date()}});
     },
 
-    async isTokenValid(token) {
+    async isTokenExpired(token) {
       const settings = await this.settings();
       const tokenDate = new Date(token.login_date || token.createdAt).getTime() / 1000;
       const nowDate = new Date().getTime() / 1000;
@@ -185,7 +185,7 @@ module.exports = (
       const token = await tokensService.findOne({where: { email }});
 
       if(token && token.is_active !== false) {
-        return this.isTokenValid(token)
+        return this.isTokenExpired(token)
       } else {
         return false
       }

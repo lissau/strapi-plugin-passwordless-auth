@@ -43,9 +43,9 @@ module.exports = {
       return ctx.badRequest("Invalid callback url")
     }
 
-    const isValid = await passwordless.isTokenValid(token);
+    const isExpired = await passwordless.isTokenExpired(token);
 
-    if (!isValid) {
+    if (!isExpired) {
       await passwordless.deactivateToken(token);
       return ctx.badRequest('token.invalid');
     }
