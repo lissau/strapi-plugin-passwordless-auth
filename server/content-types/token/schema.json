@@ -4,7 +4,7 @@
   "info": {
     "singularName": "token",
     "pluralName": "tokens",
-    "displayName": "Token",
+    "displayName": "Sign in tokens",
     "name": "token"
   },
   "options": {
