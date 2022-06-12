@@ -80,7 +80,14 @@ module.exports = {
 
     ctx.redirect(callbackUrl)
     ctx.send({
-      jwt: jwtService.issue({id: user.id}),
+      jwt: jwtService.issue({
+        id: user.id,
+        iss: "https://cykelregistret.dk/",
+        aud: "https://strapi-auth",
+      }, {
+        expiresIn: "14 days"
+      }
+      ),
       user: sanitizedUserInfo,
       context
     });
