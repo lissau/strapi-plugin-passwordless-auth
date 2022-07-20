@@ -33,14 +33,16 @@ module.exports = {
 
     const settings = await passwordless.settings()
 
-    const allowedCallbackUrls = settings.allowedCallbackUrls ? settings.allowedCallbackUrls.split(",") : []
+    if(process.env.NODE_ENV !== "development") {
+      const allowedCallbackUrls = settings.allowedCallbackUrls ? settings.allowedCallbackUrls.split(",") : []
 
-    if(allowedCallbackUrls.length < 0) {
-      return ctx.badRequest("No allowed callback urls specified in settings")
-    }
-    
-    if(!allowedCallbackUrls.includes(encodeURI(callbackUrl))) {
-      return ctx.badRequest("Invalid callback url")
+      if(allowedCallbackUrls.length < 0) {
+        return ctx.badRequest("No allowed callback urls specified in settings")
+      }
+      
+      if(!allowedCallbackUrls.includes(encodeURI(callbackUrl))) {
+        return ctx.badRequest("Invalid callback url")
+      }
     }
 
     const isExpired = await passwordless.isTokenExpired(token);
@@ -123,14 +125,19 @@ module.exports = {
 
     const settings = await passwordless.settings()
 
-    const allowedCallbackUrls = settings.allowedCallbackUrls ? settings.allowedCallbackUrls.split(",") : []
+    console.log("lars")
+    console.log({env: process.env})
 
-    if(allowedCallbackUrls.length < 0) {
-      return ctx.badRequest("No allowed callback urls specified in settings")
-    }
-    
-    if(!allowedCallbackUrls.includes(params.callbackUrl)) {
-      return ctx.badRequest("Invalid callback url")
+    if(process.env.NODE_ENV !== "development") {
+      const allowedCallbackUrls = settings.allowedCallbackUrls ? settings.allowedCallbackUrls.split(",") : []
+
+      if(allowedCallbackUrls.length < 0) {
+        return ctx.badRequest("No allowed callback urls specified in settings")
+      }
+      
+      if(!allowedCallbackUrls.includes(params.callbackUrl)) {
+        return ctx.badRequest("Invalid callback url")
+      }
     }
 
     let user;
