@@ -125,9 +125,6 @@ module.exports = {
 
     const settings = await passwordless.settings()
 
-    console.log("lars")
-    console.log({env: process.env})
-
     if(process.env.NODE_ENV !== "development") {
       const allowedCallbackUrls = settings.allowedCallbackUrls ? settings.allowedCallbackUrls.split(",") : []
 
