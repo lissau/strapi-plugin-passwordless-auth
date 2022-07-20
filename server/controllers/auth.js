@@ -84,7 +84,7 @@ module.exports = {
     ctx.send({
       jwt: jwtService.issue({
         id: user.id,
-        iss: "https://cykelregistret.dk/",
+        iss: "https://cykelejer.dk/",
         aud: "https://strapi-auth",
       }, {
         expiresIn: "14 days"
