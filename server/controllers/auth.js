@@ -107,11 +107,6 @@ module.exports = {
       return ctx.badRequest('wrong.email');
     }
 
-    const nonce = params.nonce || null
-    if (!nonce) {
-      return ctx.badRequest('Missing device unique code (nonce)');
-    }
-
     // Test if an email was already sent with a valid token
     const hasRecentToken = await passwordless.hasRecentToken(email)
     if(hasRecentToken) {
