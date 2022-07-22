@@ -69,14 +69,14 @@ const layout = [
   },
   {
     intlLabel: {
-      id: getTrad('Settings.allowedCallbackUrls.label'),
-      defaultMessage: 'Settings.allowedCallbackUrls.label',
+      id: getTrad('Settings.allowedCallbackDomains.label'),
+      defaultMessage: 'Settings.allowedCallbackDomains.label',
     },
     description: {
-      id: getTrad('Settings.allowedCallbackUrls.description'),
-      defaultMessage: "Settings.allowedCallbackUrls.description",
+      id: getTrad('Settings.allowedCallbackDomains.description'),
+      defaultMessage: "Settings.allowedCallbackDomains.description",
     },
-    name: 'allowedCallbackUrls',
+    name: 'allowedCallbackDomains',
     type: 'text',
     size: {
       col: 12,

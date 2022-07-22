@@ -11,6 +11,24 @@ const {sanitize} = require('@strapi/utils');
 const _ = require('lodash');
 const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
+const validCallbackUrl = (url, allowedDomains) => {
+
+  try {
+    const parsedUrl = new URL(callbackUrl).host.replace("www.", "")
+    const allowedDomains = settings.allowedDomains.split(",").map(s => s.trim())
+
+    if(allowedDomains.length < 0 || !allowedDomains.includes(parsedUrl)) {
+      return false
+    }
+
+    return true
+
+  } catch {
+    return false
+  }
+
+}
+
 module.exports = {
   async login(ctx) {
     const {token: receivedToken, callbackUrl} = ctx.query;
@@ -32,17 +50,11 @@ module.exports = {
     }
 
     const settings = await passwordless.settings()
+    
+    const isValidCallbackUrl = validCallbackUrl(callbackUrl, settings.allowedDomains)
 
-    if(process.env.NODE_ENV !== "development") {
-      const allowedCallbackUrls = settings.allowedCallbackUrls ? settings.allowedCallbackUrls.split(",") : []
-
-      if(allowedCallbackUrls.length < 0) {
-        return ctx.badRequest("No allowed callback urls specified in settings")
-      }
-      
-      if(!allowedCallbackUrls.includes(encodeURI(callbackUrl))) {
-        return ctx.badRequest("Invalid callback url")
-      }
+    if(!isValidCallbackUrl) {
+      return ctx.badRequest("Invalid callback url")
     }
 
     const isExpired = await passwordless.isTokenExpired(token);
@@ -125,16 +137,10 @@ module.exports = {
 
     const settings = await passwordless.settings()
 
-    if(process.env.NODE_ENV !== "development") {
-      const allowedCallbackUrls = settings.allowedCallbackUrls ? settings.allowedCallbackUrls.split(",") : []
+    const isValidCallbackUrl = validCallbackUrl(params.callbackUrl, settings.allowedDomains)
 
-      if(allowedCallbackUrls.length < 0) {
-        return ctx.badRequest("No allowed callback urls specified in settings")
-      }
-      
-      if(!allowedCallbackUrls.includes(params.callbackUrl)) {
-        return ctx.badRequest("Invalid callback url")
-      }
+    if(!isValidCallbackUrl) {
+      return ctx.badRequest("Invalid callback url")
     }
 
     let user;
