@@ -11,12 +11,13 @@ const {sanitize} = require('@strapi/utils');
 const _ = require('lodash');
 const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
-const validCallbackDomain = (url, allowedDomains) => {
+const validReturnTo = (url, allowedCallbackDomains) => {
 
+  // Act if it's a url
   try {
-    const parsedUrl = new URL(url).host.replace("www.", "")
 
-    const domains = allowedDomains.split(",").map(s => s.trim())
+    const parsedUrl = new URL(url).host.replace("www.", "")
+    const domains = allowedCallbackDomains.split(",").map(s => s.trim())
 
     if(domains.length < 0 || !domains.includes(parsedUrl)) {
       return false
@@ -24,15 +25,21 @@ const validCallbackDomain = (url, allowedDomains) => {
 
     return true
 
-  } catch {
-    return false
+  } catch (e) {
+
+    if(e.code === "ERR_INVALID_URL") {
+      return true
+    } else {
+      return false
+    }
+    
   }
 
 }
 
 module.exports = {
   async login(ctx) {
-    const {token: receivedToken, callbackUrl} = ctx.query;
+    const {token: receivedToken, returnTo} = ctx.query;
     const {passwordless} = strapi.plugins['passwordless'].services;
     const {user: userService, jwt: jwtService} = strapi.plugins['users-permissions'].services;
     const isEnabled = await passwordless.isEnabled();
@@ -52,9 +59,9 @@ module.exports = {
 
     const settings = await passwordless.settings()
     
-    const isValidCallbackDomain = validCallbackDomain(callbackUrl, settings.allowedDomains)
+    const isValidReturnTo = validReturnTo(returnTo, settings.allowedDomains)
 
-    if(!isValidCallbackDomain) {
+    if(!isValidReturnTo) {
       return ctx.badRequest("Invalid callback")
     }
 
@@ -93,7 +100,7 @@ module.exports = {
       context = {}
     }
 
-    ctx.redirect(callbackUrl)
+    ctx.redirect(returnTo)
     ctx.send({
       jwt: jwtService.issue({
         id: user.id,
@@ -118,8 +125,8 @@ module.exports = {
     }
 
     const params = _.assign(ctx.request.body);
-    if(!params.callbackUrl) {
-      return ctx.badRequest("Missing callbackUrl parameter")
+    if(!params.returnTo) {
+      return ctx.badRequest("Missing returnTo parameter")
     }
 
     const username = params.username || null;
@@ -138,9 +145,9 @@ module.exports = {
 
     const settings = await passwordless.settings()
 
-    const isValidCallbackDomain = validCallbackDomain(params.callbackUrl, settings.allowedDomains)
+    const isValidReturnTo = validReturnTo(params.returnTo, settings.allowedDomains)
 
-    if(!isValidCallbackDomain) {
+    if(!isValidReturnTo) {
       return ctx.badRequest("Invalid callback")
     }
 
@@ -166,7 +173,7 @@ module.exports = {
     try {
       const context = params.context || {};
       const token = await passwordless.createToken(user.email, context);
-      await passwordless.sendLoginLink(token, params.callbackUrl);
+      await passwordless.sendLoginLink(token, params.returnTo);
       ctx.send({
         email,
         username,
