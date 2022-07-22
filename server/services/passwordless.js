@@ -145,7 +145,7 @@ module.exports = (
 
       let body = ""
       for (var i = 0; i < codeLength; i++) {
-        body += possible.charAt(crypto.randomInt(0, combinations.length - 1));
+        body += combinations.charAt(crypto.randomInt(0, combinations.length - 1));
       }
 
       const tokenInfo = {
