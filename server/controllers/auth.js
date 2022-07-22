@@ -135,8 +135,9 @@ module.exports = {
     try {
       const context = params.context || {};
       const token = await passwordless.createToken(user.email, context);
+
       await passwordless.sendLoginLink(token);
-      
+
       ctx.send({
         email,
         username,

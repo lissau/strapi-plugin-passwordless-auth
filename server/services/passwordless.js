@@ -79,8 +79,6 @@ module.exports = (
 
       const settings = await this.settings();
 
-      console.log({email, username, settings})
-
       if (email && settings.createUserIfNotExists) {
         return this.createUser({email, username})
       }
