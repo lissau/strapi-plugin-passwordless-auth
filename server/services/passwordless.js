@@ -89,7 +89,7 @@ module.exports = (
       
     },
 
-    async sendLoginLink(token, returnTo) {
+    async sendLoginLink(token) {
       const settings = await this.settings();
       const user = await strapi.query('plugin::users-permissions.user').findOne({
         where: {email: token.email}
@@ -99,19 +99,19 @@ module.exports = (
       const sanitizedUserInfo = await sanitize.sanitizers.defaultSanitizeOutput(userSchema, user);
 
       const text = this.template(settings.message_text, {
-        URL: settings.verificationUrl + "?token=" + token.body + "&returnTo=" + returnTo,
+        URL: settings.verificationUrl + "?token=" + token.body,
         CODE: token.body,
         USER: sanitizedUserInfo
       });
 
       const html = this.template(settings.message_html, {
-        URL: settings.verificationUrl + "?token=" + token.body + "&returnTo=" + returnTo,
+        URL: settings.verificationUrl + "?token=" + token.body,
         CODE: token.body,
         USER: sanitizedUserInfo
       });
 
       const subject = this.template(settings.object, {
-        URL: settings.verificationUrl + "?token=" + token.body + "&returnTo=" + returnTo,
+        URL: settings.verificationUrl + "?token=" + token.body,
         CODE: token.body,
         USER: sanitizedUserInfo
       });

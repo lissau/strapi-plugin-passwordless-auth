@@ -11,35 +11,9 @@ const {sanitize} = require('@strapi/utils');
 const _ = require('lodash');
 const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
-const validReturnTo = (url, allowedCallbackDomains) => {
-
-  // Act if it's a url
-  try {
-
-    const parsedUrl = new URL(url).host.replace("www.", "")
-    const domains = allowedCallbackDomains.split(",").map(s => s.trim())
-
-    if(domains.length < 0 || !domains.includes(parsedUrl)) {
-      return false
-    }
-
-    return true
-
-  } catch (e) {
-
-    if(e.code === "ERR_INVALID_URL") {
-      return true
-    } else {
-      return false
-    }
-    
-  }
-
-}
-
 module.exports = {
   async login(ctx) {
-    const {token: receivedToken, returnTo} = ctx.query;
+    const {token: receivedToken, email} = ctx.query;
     const {passwordless} = strapi.plugins['passwordless'].services;
     const {user: userService, jwt: jwtService} = strapi.plugins['users-permissions'].services;
     const isEnabled = await passwordless.isEnabled();
@@ -57,12 +31,8 @@ module.exports = {
       return ctx.badRequest('Invalid token');
     }
 
-    const settings = await passwordless.settings()
-    
-    const isValidReturnTo = validReturnTo(returnTo, settings.allowedCallbackDomains)
-
-    if(!isValidReturnTo) {
-      return ctx.badRequest("Invalid callback")
+    if(email !== token.email) {
+      return ctx.badRequest('Invalid token');
     }
 
     const isExpired = await passwordless.isTokenExpired(token);
@@ -100,7 +70,6 @@ module.exports = {
       context = {}
     }
 
-    ctx.redirect(returnTo)
     ctx.send({
       jwt: jwtService.issue({
         id: user.id,
@@ -125,9 +94,6 @@ module.exports = {
     }
 
     const params = _.assign(ctx.request.body);
-    if(!params.returnTo) {
-      return ctx.badRequest("Missing returnTo parameter")
-    }
 
     const username = params.username || null;
 
@@ -141,14 +107,6 @@ module.exports = {
     const hasRecentToken = await passwordless.hasRecentToken(email)
     if(hasRecentToken) {
       return ctx.tooManyRequests("Token already sent")
-    }
-
-    const settings = await passwordless.settings()
-
-    const isValidReturnTo = validReturnTo(params.returnTo, settings.allowedCallbackDomains)
-
-    if(!isValidReturnTo) {
-      return ctx.badRequest("Invalid callback")
     }
 
     let user;
@@ -173,7 +131,7 @@ module.exports = {
     try {
       const context = params.context || {};
       const token = await passwordless.createToken(user.email, context);
-      await passwordless.sendLoginLink(token, params.returnTo);
+      await passwordless.sendLoginLink(token);
       ctx.send({
         email,
         username,
