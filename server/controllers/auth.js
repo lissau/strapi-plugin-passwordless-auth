@@ -59,7 +59,7 @@ module.exports = {
 
     const settings = await passwordless.settings()
     
-    const isValidReturnTo = validReturnTo(returnTo, settings.allowedDomains)
+    const isValidReturnTo = validReturnTo(returnTo, settings.allowedCallbackDomains)
 
     if(!isValidReturnTo) {
       return ctx.badRequest("Invalid callback")
@@ -145,7 +145,7 @@ module.exports = {
 
     const settings = await passwordless.settings()
 
-    const isValidReturnTo = validReturnTo(params.returnTo, settings.allowedDomains)
+    const isValidReturnTo = validReturnTo(params.returnTo, settings.allowedCallbackDomains)
 
     if(!isValidReturnTo) {
       return ctx.badRequest("Invalid callback")
