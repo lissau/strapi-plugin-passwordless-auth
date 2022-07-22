@@ -148,11 +148,14 @@ module.exports = (
         body += combinations.charAt(crypto.randomInt(0, combinations.length - 1));
       }
 
+      const nonce = crypto.randomBytes(20).toString('hex');
+
       const tokenInfo = {
         email,
         body,
         context: JSON.stringify(context),
-        is_active: true
+        is_active: true,
+        nonce
       };
       
       // Ensure only 1 active signin request

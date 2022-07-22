@@ -13,7 +13,7 @@ const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"
 
 module.exports = {
   async login(ctx) {
-    const {token: receivedToken, email} = ctx.query;
+    const {token: receivedToken, email, nonce} = ctx.query;
     const {passwordless} = strapi.plugins['passwordless'].services;
     const {user: userService, jwt: jwtService} = strapi.plugins['users-permissions'].services;
     const isEnabled = await passwordless.isEnabled();
@@ -32,6 +32,10 @@ module.exports = {
     }
 
     if(email !== token.email) {
+      return ctx.badRequest('Invalid token');
+    }
+
+    if(nonce !== token.nonce) {
       return ctx.badRequest('Invalid token');
     }
 
@@ -103,6 +107,11 @@ module.exports = {
       return ctx.badRequest('wrong.email');
     }
 
+    const nonce = params.nonce || null
+    if (!nonce) {
+      return ctx.badRequest('Missing device unique code (nonce)');
+    }
+
     // Test if an email was already sent with a valid token
     const hasRecentToken = await passwordless.hasRecentToken(email)
     if(hasRecentToken) {
@@ -132,9 +141,11 @@ module.exports = {
       const context = params.context || {};
       const token = await passwordless.createToken(user.email, context);
       await passwordless.sendLoginLink(token);
+      
       ctx.send({
         email,
         username,
+        nonce: token.nonce,
         sent: true,
       });
     } catch (err) {
