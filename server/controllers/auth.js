@@ -11,13 +11,14 @@ const {sanitize} = require('@strapi/utils');
 const _ = require('lodash');
 const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
-const validCallbackUrl = (url, allowedDomains) => {
+const validCallbackDomain = (url, allowedDomains) => {
 
   try {
-    const parsedUrl = new URL(callbackUrl).host.replace("www.", "")
-    const allowedDomains = settings.allowedDomains.split(",").map(s => s.trim())
+    const parsedUrl = new URL(url).host.replace("www.", "")
 
-    if(allowedDomains.length < 0 || !allowedDomains.includes(parsedUrl)) {
+    const domains = allowedDomains.split(",").map(s => s.trim())
+
+    if(domains.length < 0 || !domains.includes(parsedUrl)) {
       return false
     }
 
@@ -51,10 +52,10 @@ module.exports = {
 
     const settings = await passwordless.settings()
     
-    const isValidCallbackUrl = validCallbackUrl(callbackUrl, settings.allowedDomains)
+    const isValidCallbackDomain = validCallbackDomain(callbackUrl, settings.allowedDomains)
 
-    if(!isValidCallbackUrl) {
-      return ctx.badRequest("Invalid callback url")
+    if(!isValidCallbackDomain) {
+      return ctx.badRequest("Invalid callback")
     }
 
     const isExpired = await passwordless.isTokenExpired(token);
@@ -137,10 +138,10 @@ module.exports = {
 
     const settings = await passwordless.settings()
 
-    const isValidCallbackUrl = validCallbackUrl(params.callbackUrl, settings.allowedDomains)
+    const isValidCallbackDomain = validCallbackDomain(params.callbackUrl, settings.allowedDomains)
 
-    if(!isValidCallbackUrl) {
-      return ctx.badRequest("Invalid callback url")
+    if(!isValidCallbackDomain) {
+      return ctx.badRequest("Invalid callback")
     }
 
     let user;
