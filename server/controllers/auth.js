@@ -28,14 +28,21 @@ module.exports = {
     const token = await passwordless.fetchToken(receivedToken);
 
     if (!token || !token.is_active) {
+      if(!token) {
+        console.warn("User did not have a token when requesting login!")
+      } else {
+        console.info("User token was inactive")
+      }
       return ctx.badRequest('Invalid token');
     }
 
     if(email !== token.email) {
+      console.warn("User email did not match token email!")
       return ctx.badRequest('Invalid token');
     }
 
     if(nonce !== token.nonce) {
+      console.warn("User nonce did not match token nonce!")
       return ctx.badRequest('Invalid token');
     }
 
@@ -43,7 +50,8 @@ module.exports = {
 
     if (isExpired) {
       await passwordless.deactivateToken(token);
-      return ctx.badRequest('token.invalid');
+      console.info("User token is expired")
+      return ctx.badRequest('Invalid token');
     }
 
     await passwordless.updateTokenOnLogin(token);
@@ -53,10 +61,12 @@ module.exports = {
     });
 
     if (!user) {
+      console.warn("Did not find a user matching token email")
       return ctx.badRequest('wrong.email');
     }
 
     if (user.blocked) {
+      console.info("User was blocked")
       return ctx.badRequest('blocked.user');
     }
 
