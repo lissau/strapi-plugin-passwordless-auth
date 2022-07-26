@@ -135,10 +135,11 @@ module.exports = (
     async createToken(email, context) {
       const tokensService = strapi.query('plugin::passwordless.token');
 
-      const combinations = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+      // No 0 and O
+      const combinations = "ABCDEFGHIJKLMNPQRSTUVWXYZ123456789"
 
       const codeLength = 4
-      // 1679616 combinations
+      // 34^4 = 1336336 combinations
       // KuCoin uses letters only 10^4=1 million. 
 
       let body = ""
