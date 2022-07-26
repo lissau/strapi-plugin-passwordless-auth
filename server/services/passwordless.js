@@ -199,7 +199,7 @@ module.exports = (
       const token = await tokensService.findOne({where: { email }});
 
       if(token && token.is_active !== false) {
-        return this.isTokenExpired(token)
+        return !this.isTokenExpired(token)
       } else {
         return false
       }
