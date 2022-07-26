@@ -177,7 +177,8 @@ module.exports = (
       const settings = await this.settings();
       const tokenDate = new Date(token.updatedAt).getTime() / 1000;
       const nowDate = new Date().getTime() / 1000;
-      return nowDate - tokenDate <= settings.expire_period;
+
+      return nowDate - tokenDate > settings.expire_period;
     },
 
     async deactivateToken(token) {
