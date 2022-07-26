@@ -41,7 +41,7 @@ module.exports = {
 
     const isExpired = await passwordless.isTokenExpired(token);
 
-    if (!isExpired) {
+    if (isExpired) {
       await passwordless.deactivateToken(token);
       return ctx.badRequest('token.invalid');
     }
