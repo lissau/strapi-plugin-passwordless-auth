@@ -15,6 +15,83 @@ module.exports = (
     strapi
   }
 ) => {
+
+  const sendEmail = async (
+    {
+      template,
+      userInfo,
+      token,
+      settings
+    }
+    ) => {
+
+    const text = template(settings.message_text, {
+      URL: settings.verificationUrl + "?token=" + token.body,
+      CODE: token.body,
+      USER: userInfo
+    });
+  
+    const html = template(settings.message_html, {
+      URL: settings.verificationUrl + "?token=" + token.body,
+      CODE: token.body,
+      USER: userInfo
+    });
+  
+    const subject = template(settings.object, {
+      URL: settings.verificationUrl + "?token=" + token.body,
+      CODE: token.body,
+      USER: userInfo
+    });
+  
+    const sendData = {
+      to: token.email,
+      from:
+        settings.from_email && settings.from_name
+          ? `${settings.from_name} <${settings.from_email}>`
+          : undefined,
+      replyTo: settings.response_email,
+      subject,
+      text,
+      html,
+    }
+    // Send an email to the user.
+    return await strapi
+      .plugin('email')
+      .service('email')
+      .send(sendData);
+  
+  }
+  
+  const sendSMS = async ({
+    template,
+    to,
+    token,
+    settings
+  }) => {
+  
+    const { twilio } = strapi.config.get('plugin.passwordless')
+
+    if(!twilio) {
+      return ctx.internalError("Invalid configuration")
+    }
+
+    const client = require('twilio')(twilio.accountSID, twilio.authToken);
+
+    const text = template(settings.message_text, {
+      CODE: token.body
+    });
+
+    const response = await client.messages
+    .create({
+      body: text,
+      from: settings.from_sms,
+      to
+    })
+
+    return response
+  
+  }
+
   return {
 
     async initialize() {
@@ -50,10 +127,18 @@ module.exports = (
         .findOne({type: userSettings.default_role}, []);
 
       const newUser = {
-        email: user.email,
-        username: user.username || user.email,
+        username: user.username || user.email || user.phonenumber,
         role: {id: role.id}
       };
+      
+      if(user.email) {
+        newUser.email = user.email
+      }
+
+      if(user.phonenumber) {
+        newUser.phonenumber = user.phonenumber
+      }
+
       return strapi
         .query('plugin::users-permissions.user')
         .create({data: newUser, populate: ['role']});
@@ -96,40 +181,23 @@ module.exports = (
       // Sanitize the template's user information
       const sanitizedUserInfo = await sanitize.sanitizers.defaultSanitizeOutput(userSchema, user);
 
-      const text = this.template(settings.message_text, {
-        URL: settings.verificationUrl + "?token=" + token.body,
-        CODE: token.body,
-        USER: sanitizedUserInfo
-      });
+      const channel = settings.useSMSVerification ? "sms" : "email"
 
-      const html = this.template(settings.message_html, {
-        URL: settings.verificationUrl + "?token=" + token.body,
-        CODE: token.body,
-        USER: sanitizedUserInfo
-      });
-
-      const subject = this.template(settings.object, {
-        URL: settings.verificationUrl + "?token=" + token.body,
-        CODE: token.body,
-        USER: sanitizedUserInfo
-      });
-
-      const sendData = {
-        to: token.email,
-        from:
-          settings.from_email && settings.from_name
-            ? `${settings.from_name} <${settings.from_email}>`
-            : undefined,
-        replyTo: settings.response_email,
-        subject,
-        text,
-        html,
+      if(channel === "sms") {
+        return await sendSMS({
+          template: this.template,
+          to: user.phonenumber,
+          token, 
+          settings
+        })
+      } else {
+        return await sendEmail({
+          template: this.template,
+          userInfo: sanitizedUserInfo,
+          token,
+          settings
+        })
       }
-      // Send an email to the user.
-      return await strapi
-        .plugin('email')
-        .service('email')
-        .send(sendData);
     },
 
     async createToken(email, context) {

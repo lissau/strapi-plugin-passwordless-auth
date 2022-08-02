@@ -37,6 +37,23 @@ const layout = [
   },
   {
     intlLabel: {
+      id: getTrad('Settings.useSMS.label'),
+      defaultMessage: 'Settings.useSMS.label',
+    },
+    description: {
+      id: getTrad('Settings.useSMS.description'),
+      defaultMessage:
+        'Settings.useSMS.description',
+    },
+    name: 'useSMSVerification',
+    type: 'bool',
+    size: {
+      col: 6,
+      xs: 6,
+    },
+  },
+  {
+    intlLabel: {
       id: getTrad('Settings.expire_period.label'),
       defaultMessage: 'Settings.expire_period.label',
     },
@@ -113,6 +130,25 @@ const layout = [
     },
     name: 'from_email',
     type: 'email',
+    size: {
+      col: 6,
+      xs: 6,
+    },
+    validations: {
+      required: true
+    }
+  },
+  {
+    intlLabel: {
+      id: getTrad('SMS.options.from.label'),
+      defaultMessage: 'SMS.options.from.label',
+    },
+    placeholder: {
+      id: getTrad('SMS.options.from.placeholder'),
+      defaultMessage: 'SMS.options.from.placeholder',
+    },
+    name: 'from_sms',
+    type: 'text',
     size: {
       col: 6,
       xs: 6,
