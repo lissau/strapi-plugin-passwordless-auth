@@ -115,11 +115,6 @@ module.exports = (
       return pluginStore.get({key: 'advanced'});
     },
 
-    async settings() {
-      const settings = await this.settings();
-      return settings;
-    },
-
     async createUser(user) {
       const userSettings = await this.userSettings();
       const role = await strapi
