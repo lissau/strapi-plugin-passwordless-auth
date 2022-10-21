@@ -115,9 +115,9 @@ module.exports = (
       return pluginStore.get({key: 'advanced'});
     },
 
-    async isEnabled() {
+    async settings() {
       const settings = await this.settings();
-      return !!settings.enabled;
+      return settings;
     },
 
     async createUser(user) {

@@ -102,6 +102,22 @@ const layout = [
   },
   {
     intlLabel: {
+      id: getTrad('Settings.jwt.issuer.label'),
+      defaultMessage: 'Settings.jwt.issuer.label',
+    },
+    description: {
+      id: getTrad('Settings.jwt.issuer.description'),
+      defaultMessage: "Settings.jwt.issuer.description",
+    },
+    name: 'jwtIssuer',
+    type: 'text',
+    size: {
+      col: 12,
+      xs: 12,
+    },
+  },
+  {
+    intlLabel: {
       id: getTrad('Email.options.from.name.label'),
       defaultMessage: 'Email.options.from.name.label',
     },

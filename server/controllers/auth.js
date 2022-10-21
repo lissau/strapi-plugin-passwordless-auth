@@ -16,10 +16,14 @@ module.exports = {
     const {token: receivedToken, email, nonce} = ctx.query;
     const {passwordless} = strapi.plugins['passwordless'].services;
     const {user: userService, jwt: jwtService} = strapi.plugins['users-permissions'].services;
-    const isEnabled = await passwordless.isEnabled();
+    const settings = await passwordless.settings();
 
-    if (!isEnabled) {
+    if (!settings.isEnabled) {
       return ctx.badRequest('Plugin disabled');
+    }
+
+    if(!settings.jwtIssuer) {
+      return ctx.badRequest('JWT issuer is not configured')
     }
 
     if (_.isEmpty(receivedToken)) {
@@ -87,7 +91,7 @@ module.exports = {
     ctx.send({
       jwt: jwtService.issue({
         id: user.id,
-        iss: "https://cykelejer.dk/",
+        iss: settings.jwtIssuer,
         aud: "https://strapi-auth",
       }, {
         expiresIn: "14 days"
@@ -101,9 +105,9 @@ module.exports = {
   async sendLink(ctx) {
     const { passwordless } = strapi.plugins['passwordless'].services;
 
-    const isEnabled = await passwordless.isEnabled();
+    const settings = await passwordless.settings();
 
-    if (!isEnabled) {
+    if (!settings.isEnabled) {
       return ctx.badRequest('plugin.disabled');
     }
 

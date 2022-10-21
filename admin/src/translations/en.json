@@ -8,6 +8,8 @@
   "Settings.useSMS.label": "Use SMS verification",
   "Settings.expire_period.description": "Passwordless link expire in the period in seconds.",
   "Settings.allowedCallbackDomains.description": "Comma separated list of allowed callback domains (without https:// or www.)",
+  "Settings.jwt.issuer.description": "The party that created the token and signed it with its private key.",
+  "Settings.jwt.issuer.label": "JWT Issuer",
   "Settings.enabled.label": "Enable Passwordless plugin",
   "Settings.expire_period.label": "Link validity period (seconds)",
   "Settings.allowedCallbackDomains.label": "Allowed callback domains",
