@@ -18,7 +18,7 @@ module.exports = {
     const {user: userService, jwt: jwtService} = strapi.plugins['users-permissions'].services;
     const settings = await passwordless.settings();
 
-    if (!settings.isEnabled) {
+    if (!settings.enabled) {
       return ctx.badRequest('Plugin disabled');
     }
 
@@ -107,7 +107,7 @@ module.exports = {
 
     const settings = await passwordless.settings();
 
-    if (!settings.isEnabled) {
+    if (!settings.enabled) {
       return ctx.badRequest('plugin.disabled');
     }
 
