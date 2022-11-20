@@ -110,7 +110,7 @@ module.exports = {
         iss: settings.jwtIssuer,
         aud: "https://strapi-auth",
       }, {
-        expiresIn: "14 days"
+        expiresIn: "180 days"
       }
       ),
       user: sanitizedUserInfo,
