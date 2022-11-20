@@ -106,20 +106,14 @@ module.exports = (
       return pluginStore.get({key: 'settings'});
     },
 
-    userSettings() {
-      const pluginStore = strapi.store({
-        environment: '',
-        type: 'plugin',
-        name: 'users-permissions',
-      });
-      return pluginStore.get({key: 'advanced'});
-    },
-
     async createUser(user) {
-      const userSettings = await this.userSettings();
       const role = await strapi
         .query('plugin::users-permissions.role')
-        .findOne({type: userSettings.default_role}, []);
+        .findOne({ where: {type: 'public'}});
+
+      if(!role) {
+        throw new Error("No public role found")
+      }
 
       const newUser = {
         username: user.username || user.email || user.phonenumber,

@@ -60,8 +60,9 @@ module.exports = {
 
     await passwordless.updateTokenOnLogin(token);
 
-    const user = await strapi.query('plugin::users-permissions.user').findOne({
-      where: {email: token.email}
+    let user = await strapi.query('plugin::users-permissions.user').findOne({
+      where: {email: token.email},
+      populate: ['role']
     });
 
     if (!user) {
@@ -74,9 +75,24 @@ module.exports = {
       return ctx.badRequest('blocked.user');
     }
 
-    if (!user.confirmed) {
-      await userService.edit(user.id, { confirmed: true });
+    const pluginStore = await strapi.store({
+      environment: '',
+      type: 'plugin',
+      name: 'users-permissions',
+    });
+    const defaultRole = await pluginStore.get({key: 'advanced'});
+
+    if(!user.role?.type || user.role?.type === "public") {
+      const role = await strapi
+      .query('plugin::users-permissions.role')
+      .findOne({ where: { type: defaultRole.default_role } })
+
+      user = await userService.edit(user.id, { 
+        role: role.id,
+        confirmed: true
+      });
     }
+
     const userSchema = strapi.getModel('plugin::users-permissions.user');
     // Sanitize the template's user information
     const sanitizedUserInfo = await sanitize.sanitizers.defaultSanitizeOutput(userSchema, user);
@@ -131,7 +147,7 @@ module.exports = {
     try {
       user = await passwordless.user(email, username);
     } catch (e) {
-      return ctx.badRequest('wrong.user')
+      return ctx.badRequest('wrong.user', e)
     }
 
     if (!user) {
