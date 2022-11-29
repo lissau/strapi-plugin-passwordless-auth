@@ -9,6 +9,7 @@
 const _ = require("lodash");
 const crypto = require("crypto");
 const {sanitize} = require('@strapi/utils');
+const { v4: uuidv4 } = require('uuid');
 
 module.exports = (
   {
@@ -117,6 +118,7 @@ module.exports = (
 
       const newUser = {
         username: user.username || user.email || user.phonenumber,
+        uuid: uuidv4(),
         role: {id: role.id}
       };
       
