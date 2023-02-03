@@ -107,6 +107,7 @@ module.exports = {
     ctx.send({
       jwt: jwtService.issue({
         id: user.id,
+        role: user.role,
         iss: settings.jwtIssuer,
         aud: "https://strapi-auth",
       }, {
