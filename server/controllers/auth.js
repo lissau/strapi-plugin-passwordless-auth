@@ -115,13 +115,18 @@ module.exports = {
       context = {}
     }
 
+    let extraFields = {}
+    try {
+      extraFields = populate.reduce((prev, field) => ({...prev, [field]: user[field]}), {})
+    } catch (e) {
+      strapi.log.error("Unable to reduce populated fields to object", e)
+    }
+
     ctx.send({
       jwt: jwtService.issue({
         id: user.id,
         role: user.role.type,
-        ...populate.map(field => ({
-          [field]: user[field]
-        })),
+        ...extraFields,
         iss: settings.jwtIssuer,
         aud: "https://strapi-auth",
       }, {
