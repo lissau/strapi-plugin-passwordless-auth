@@ -143,3 +143,30 @@ Give a star if this project helped you.
 ## License
 
 [MIT License](LICENSE) Copyright (c) [Andrey Kucherenko](https://github.com/kucherenko).
+
+
+## Futher developed
+
+### Run function before login
+
+Add the function `beforeLogin` to the strapi plugin config object:
+
+e.g.
+
+`
+passwordless: {
+  config: {
+    // Populate fields from user to be used in `beforeLogin`
+    populate: ['organization'],
+    beforeLogin: async (user, ctx) => {
+      if(
+        user.organization.allowedAccessUntil && 
+        dayjs(user.organization.allowedAccessUntil).isBefore(dayjs.utc())
+      ) {
+          return () => ctx.unauthorized("Access expired")
+        }
+    }
+  },
+}
+`
+

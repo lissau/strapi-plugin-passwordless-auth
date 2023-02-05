@@ -58,11 +58,12 @@ module.exports = {
       return ctx.badRequest('Invalid token');
     }
 
-    await passwordless.updateTokenOnLogin(token);
+    const config = strapi.config.get('plugin.passwordless')
+    const populate = config.populate || []
 
     let user = await strapi.query('plugin::users-permissions.user').findOne({
       where: {email: token.email},
-      populate: ['role']
+      populate: ['role', ...populate]
     });
 
     if (!user) {
@@ -74,6 +75,16 @@ module.exports = {
       console.info("User was blocked")
       return ctx.badRequest('blocked.user');
     }
+
+    if(config.beforeLogin) {
+      const result = await config.beforeLogin(user, ctx)
+
+      if(result) {
+        return result()
+      }
+    }
+
+    await passwordless.updateTokenOnLogin(token);
 
     const pluginStore = await strapi.store({
       environment: '',
@@ -108,6 +119,9 @@ module.exports = {
       jwt: jwtService.issue({
         id: user.id,
         role: user.role.type,
+        ...populate.map(field => ({
+          [field]: user[field]
+        })),
         iss: settings.jwtIssuer,
         aud: "https://strapi-auth",
       }, {
