@@ -67,8 +67,8 @@ module.exports = {
     });
 
     if (!user) {
-      console.warn("Did not find a user matching token email")
-      return ctx.badRequest('wrong.email');
+      strapi.log.info("User not found")
+      return ctx.notFound();
     }
 
     if (user.blocked) {
