@@ -54,7 +54,7 @@ module.exports = {
 
     if (isExpired) {
       await passwordless.deactivateToken(token);
-      console.info("User token is expired")
+      strapi.log.info("User token is expired")
       return ctx.badRequest('Invalid token');
     }
 
@@ -72,7 +72,7 @@ module.exports = {
     }
 
     if (user.blocked) {
-      console.info("User was blocked")
+      strapi.log.info("Blocked user attempted to sign in")
       return ctx.badRequest('blocked.user');
     }
 
@@ -154,7 +154,7 @@ module.exports = {
     const email = params.email ? params.email.trim().toLowerCase() : null;
     const isEmail = emailRegExp.test(email);
     if (email && !isEmail) {
-      return ctx.badRequest('wrong.email');
+      return ctx.badRequest();
     }
 
     // Test if an email was already sent with a valid token
@@ -167,15 +167,18 @@ module.exports = {
     try {
       user = await passwordless.user(email, username);
     } catch (e) {
-      return ctx.badRequest('wrong.user', e)
+      strapi.log.error("Could not retrieve user")
+      return ctx.badRequest()
     }
 
     if (!user) {
-      return ctx.badRequest('wrong.email');
+      strapi.log.info("User not found")
+      return ctx.notFound();
     }
 
     if (email && user.email !== email) {
-      return ctx.badRequest('wrong.user')
+      strapi.log.error("Token user did not match request body email")
+      return ctx.badRequest()
     }
 
     if (user.blocked) {
