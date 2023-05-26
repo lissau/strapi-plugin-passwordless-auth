@@ -135,14 +135,15 @@ module.exports = (
         .create({data: newUser, populate: ['role']});
     },
 
-    async user(email, username) {
+    async user(email, username, populate) {
 
       const service = strapi.query('plugin::users-permissions.user')
       
       if(email || username) {
         
         const user = await service.findOne({
-          where: email ? { email } : { username }
+          where: email ? { email } : { username },
+          populate
         });
 
         if (user) {

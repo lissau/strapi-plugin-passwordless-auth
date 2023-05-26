@@ -59,11 +59,10 @@ module.exports = {
     }
 
     const config = strapi.config.get('plugin.passwordless')
-    const populate = config.populate || []
 
     let user = await strapi.query('plugin::users-permissions.user').findOne({
       where: {email: token.email},
-      populate: ['role', ...populate]
+      populate: ['role']
     });
 
     if (!user) {
@@ -74,14 +73,6 @@ module.exports = {
     if (user.blocked) {
       strapi.log.info("Blocked user attempted to sign in")
       return ctx.badRequest('blocked.user');
-    }
-
-    if(config.beforeLogin) {
-      const result = await config.beforeLogin(user, ctx)
-
-      if(result) {
-        return result()
-      }
     }
 
     await passwordless.updateTokenOnLogin(token);
@@ -163,9 +154,13 @@ module.exports = {
     //   return ctx.tooManyRequests("Token already sent")
     // }
 
+    const config = strapi.config.get('plugin.passwordless')
+    const populate = config.populate || []
+
     let user;
     try {
-      user = await passwordless.user(email, username);
+
+      user = await passwordless.user(email, username, populate);
     } catch (e) {
       strapi.log.error("Could not retrieve user")
       return ctx.badRequest()
@@ -183,6 +178,14 @@ module.exports = {
 
     if (user.blocked) {
       return ctx.badRequest('blocked.user');
+    }
+
+    if(config.beforeLogin) {
+      const result = await config.beforeLogin(user, ctx)
+
+      if(result) {
+        return result()
+      }
     }
 
     try {
