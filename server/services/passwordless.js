@@ -123,7 +123,7 @@ module.exports = (
       };
       
       if(user.email) {
-        newUser.email = user.email
+        newUser.email = user.email.trim().toLowerCase()
       }
 
       if(user.phonenumber) {
