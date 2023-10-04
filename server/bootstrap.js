@@ -46,7 +46,7 @@ module.exports = async (
     const value = {
       enabled: true,
       createUserIfNotExists: true,
-      expire_period: 3600,
+      expire_period: 600,
       from_name: 'Administration Panel',
       from_email: 'no-reply@strapi.io',
       response_email: '',

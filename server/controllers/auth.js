@@ -149,10 +149,10 @@ module.exports = {
     }
 
     // Test if an email was already sent with a valid token
-    // const hasRecentToken = await passwordless.hasRecentToken(email)
-    // if(hasRecentToken) {
-    //   return ctx.tooManyRequests("Token already sent")
-    // }
+    const hasRecentToken = await passwordless.hasRecentToken(email)
+    if(hasRecentToken) {
+      return ctx.tooManyRequests("Token already sent")
+    }
 
     const config = strapi.config.get('plugin.passwordless')
     const populate = config.populate || []
