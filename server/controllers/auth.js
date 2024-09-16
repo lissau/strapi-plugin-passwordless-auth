@@ -61,7 +61,11 @@ module.exports = {
     const config = strapi.config.get('plugin.passwordless')
 
     let user = await strapi.query('plugin::users-permissions.user').findOne({
-      where: {email: token.email},
+      where: {
+        email: {
+          $eqi: token.email
+        }
+      },
       populate: ['role']
     });
 

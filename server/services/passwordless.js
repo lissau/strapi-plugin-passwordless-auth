@@ -142,7 +142,11 @@ module.exports = (
       if(email || username) {
         
         const user = await service.findOne({
-          where: email ? { email } : { username },
+          where: email ? { 
+            email: {
+              $eqi: email
+            }
+          } : { username },
           populate
         });
 
@@ -167,7 +171,9 @@ module.exports = (
     async sendLoginLink(token) {
       const settings = await this.settings();
       const user = await strapi.query('plugin::users-permissions.user').findOne({
-        where: {email: token.email}
+        where: {email: {
+          $eqi: token.email
+        }}
       });
       const userSchema = strapi.getModel('plugin::users-permissions.user');
       // Sanitize the template's user information
@@ -218,7 +224,11 @@ module.exports = (
       };
       
       // Ensure only 1 active signin request
-      const updatedToken = await tokensService.update({where: { email }, data: tokenInfo});
+      const updatedToken = await tokensService.update({where: { 
+        email: {
+          $eqi: email
+        }
+      }, data: tokenInfo});
       if(updatedToken) {
         return updatedToken
       }
@@ -256,7 +266,13 @@ module.exports = (
     async hasRecentToken(email) {
       const tokensService = strapi.query('plugin::passwordless.token');
 
-      const token = await tokensService.findOne({where: { email }});
+      const token = await tokensService.findOne({
+        where: { 
+          email: {
+            $eqi: email
+          }
+        }
+      });
 
       if(token && token.is_active !== false) {
         return !this.isTokenExpired(token)
