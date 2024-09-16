@@ -40,7 +40,7 @@ module.exports = {
       return ctx.badRequest('Invalid token');
     }
 
-    if(email !== token.email) {
+    if(email.toLowerCase() !== token.email.toLowerCase()) {
       console.warn("User email did not match token email!")
       return ctx.badRequest('Invalid token');
     }
@@ -175,7 +175,7 @@ module.exports = {
       return ctx.notFound();
     }
 
-    if (email && user.email !== email) {
+    if (email && user.email.toLowerCase() !== email.toLowerCase()) {
       strapi.log.error("Token user did not match request body email")
       return ctx.badRequest()
     }
